@@ -10,7 +10,9 @@ export const cookieOptions = () => {
   return {
     httpOnly: true,
     secure: isProd, // requires HTTPS in production
-    sameSite: isProd ? 'strict' : 'lax',
+    // 'none' is required for the cookie to be sent when the frontend and backend are deployed
+    // on different origins (e.g. separate Vercel projects); browsers only accept 'none' over HTTPS.
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/'
   };
