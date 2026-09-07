@@ -16,7 +16,8 @@ function App() {
   return (
     <Routes>
       <Route element={<StorefrontLayout />}>
-        <Route path="/" element={<HomePage />} />
+        {/* <Route path="/" element={<HomePage />} /> */}
+        <Route path="/" element={<div style={{ padding: 40, fontSize: 24, color: 'black' }}>React is working!</div>} />
         <Route path="/products/:slug" element={<ProductDetailPage />} />
         <Route
           path="/cart"
