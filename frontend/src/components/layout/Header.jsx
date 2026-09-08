@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useCart } from '../../context/CartContext.jsx';
 import CategoryNav from './CategoryNav.jsx';
 
 const Header = () => {
   const { user, logout } = useAuth();
+  const { itemCount } = useCart();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
@@ -52,12 +54,19 @@ const Header = () => {
         </form>
 
         <div className="flex items-center gap-5 text-sm">
-          <Link to="/cart" className="relative flex items-center gap-1.5 text-ink-600 hover:text-brand-600 font-medium transition-colors">
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
+          <Link to="/cart" className="flex items-center gap-1.5 text-ink-600 hover:text-brand-600 font-medium transition-colors">
+            <span className="relative">
+              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-gradient text-white text-[10px] font-bold flex items-center justify-center shadow-card">
+                  {itemCount > 99 ? '99+' : itemCount}
+                </span>
+              )}
+            </span>
             <span className="hidden sm:inline">Cart</span>
           </Link>
 

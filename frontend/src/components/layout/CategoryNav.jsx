@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../../api/axios.js';
 
 const FALLBACK_CATEGORIES = [
@@ -18,11 +18,15 @@ const ICONS = {
       <path d="M9 18h6M10 22h4" />
       <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z" />
     </>
-  )
+  ),
+  all: <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zm0 9h7v7h-7v-7zM4 13h7v7H4v-7z" />
 };
 
 const CategoryNav = () => {
   const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
+  const [searchParams] = useSearchParams();
+  const activeCategory = searchParams.get('category') || '';
+  const hasSearch = searchParams.has('search');
 
   useEffect(() => {
     api
@@ -33,21 +37,28 @@ const CategoryNav = () => {
       .catch(() => {});
   }, []);
 
+  const tabs = [{ name: 'All', slug: '' }, ...categories];
+
   return (
     <nav className="bg-ink-900">
       <div className="max-w-7xl mx-auto px-4 flex gap-1 text-sm font-medium overflow-x-auto">
-        {categories.map((cat) => (
-          <Link
-            key={cat.slug}
-            to={`/?category=${cat.slug}`}
-            className="flex items-center gap-2 py-2.5 px-3 whitespace-nowrap text-ink-300 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {ICONS[cat.slug] || <circle cx="12" cy="12" r="9" />}
-            </svg>
-            {cat.name}
-          </Link>
-        ))}
+        {tabs.map((cat) => {
+          const isActive = !hasSearch && activeCategory === cat.slug;
+          return (
+            <Link
+              key={cat.slug || 'all'}
+              to={cat.slug ? `/?category=${cat.slug}` : '/'}
+              className={`flex items-center gap-2 py-2.5 px-3 whitespace-nowrap rounded-md transition-colors ${
+                isActive ? 'text-white bg-white/10' : 'text-ink-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <svg viewBox="0 0 24 24" className={`w-4 h-4 ${isActive ? 'text-brand-400' : 'text-brand-400/80'}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {ICONS[cat.slug || 'all'] || <circle cx="12" cy="12" r="9" />}
+              </svg>
+              {cat.name}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

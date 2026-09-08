@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api/axios.js';
+import { useCart } from '../context/CartContext.jsx';
+import { useToast } from '../context/ToastContext.jsx';
 
 const QuantityStepper = ({ quantity, onChange }) => (
   <div className="flex items-center border border-ink-200 rounded-lg overflow-hidden shrink-0">
@@ -26,30 +26,21 @@ const QuantityStepper = ({ quantity, onChange }) => (
 );
 
 const CartPage = () => {
-  const [cart, setCart] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { cart, loading, updateItem, removeItem } = useCart();
+  const { showToast } = useToast();
 
-  const loadCart = () => {
-    setLoading(true);
-    api
-      .get('/cart')
-      .then(({ data }) => setCart(data.cart))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    loadCart();
-  }, []);
-
-  const updateQuantity = async (itemId, quantity) => {
+  const updateQuantity = (itemId, quantity) => {
     if (quantity < 1) return;
-    await api.put(`/cart/items/${itemId}`, { quantity });
-    loadCart();
+    updateItem(itemId, quantity);
   };
 
-  const removeItem = async (itemId) => {
-    await api.delete(`/cart/items/${itemId}`);
-    loadCart();
+  const handleRemove = async (item) => {
+    try {
+      await removeItem(item._id);
+      showToast(`${item.variantName} removed from cart`, 'warning');
+    } catch {
+      showToast('Could not remove item. Please try again.', 'error');
+    }
   };
 
   if (loading) {
@@ -111,7 +102,7 @@ const CartPage = () => {
                 <div className="flex flex-col items-end gap-2">
                   <QuantityStepper quantity={item.quantity} onChange={(qty) => updateQuantity(item._id, qty)} />
                   <button
-                    onClick={() => removeItem(item._id)}
+                    onClick={() => handleRemove(item)}
                     className="flex items-center gap-1 text-red-500 text-xs font-medium hover:underline"
                   >
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

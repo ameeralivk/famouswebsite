@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../api/axios.js';
+import { useCart } from '../context/CartContext.jsx';
 import VariantSelector from '../components/product/VariantSelector.jsx';
 import ImageGallery from '../components/product/ImageGallery.jsx';
 
@@ -14,6 +15,7 @@ const ProductDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { addItem } = useCart();
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ const ProductDetailPage = () => {
   const addToCart = async () => {
     setMessage('');
     try {
-      await api.post('/cart/items', { productId: product._id, variantId: selectedVariant._id, quantity: 1 });
+      await addItem(product._id, selectedVariant._id, 1);
       setMessage('success');
     } catch (err) {
       if (err.response?.status === 401) {
