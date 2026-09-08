@@ -9,8 +9,30 @@ const columns = [
   }
 ];
 
+const trustPoints = [
+  { label: 'Genuine Products', icon: 'M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z' },
+  { label: 'Secure Payments', icon: 'M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 1 0-8 0v4h8z' },
+  { label: 'Easy Store Returns', icon: 'M3 10h11a5 5 0 0 1 0 10H9m-6-10 4-4m-4 4 4 4' },
+  { label: 'Local Store Pickup', icon: 'M3 9l9-6 9 6M4 10v9h16v-9' }
+];
+
 const Footer = () => (
   <footer className="bg-ink-900 text-ink-300 mt-20">
+    <div className="border-b border-white/10">
+      <div className="max-w-7xl mx-auto px-4 py-7 grid grid-cols-2 md:grid-cols-4 gap-6">
+        {trustPoints.map((point) => (
+          <div key={point.label} className="flex items-center gap-3">
+            <span className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={point.icon} />
+              </svg>
+            </span>
+            <span className="text-xs sm:text-sm text-ink-300 font-medium leading-tight">{point.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
     <div className="max-w-7xl mx-auto px-4 py-12 grid sm:grid-cols-2 md:grid-cols-4 gap-10">
       <div>
         <div className="flex items-center gap-2.5 mb-3">
