@@ -88,8 +88,10 @@ app.use('/api/upload', uploadRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-// 2. Only listen locally; Vercel serverless handles incoming HTTP calls automatically
-if (process.env.NODE_ENV !== 'production') {
+// 2. Only listen locally; Vercel serverless handles incoming HTTP calls automatically.
+// Check for VERCEL (auto-injected in every Vercel environment) rather than NODE_ENV, since
+// NODE_ENV isn't set automatically for serverless function runtime.
+if (!process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Famous Hardware API running on port ${PORT}`));
 }

@@ -6,7 +6,10 @@ export const generateToken = (user) =>
   });
 
 export const cookieOptions = () => {
-  const isProd = process.env.NODE_ENV === 'production';
+  // NODE_ENV isn't set automatically for Vercel serverless functions at runtime (only during the
+  // build step), so relying on it alone silently breaks auth once deployed. VERCEL is injected
+  // automatically in every Vercel environment (production and preview), so use it as a fallback.
+  const isProd = process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL);
   return {
     httpOnly: true,
     secure: isProd, // requires HTTPS in production
