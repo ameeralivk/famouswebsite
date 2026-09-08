@@ -10,11 +10,10 @@ export const cookieOptions = () => {
   return {
     httpOnly: true,
     secure: isProd, // requires HTTPS in production
-    // 'lax' works here because vercel.json serves the frontend and /api/* from the same domain
-    // (same-origin). If you ever split them into separate Vercel projects/domains, switch this
-    // to 'none' (requires secure: true, which is already set above) or cross-site requests won't
-    // carry the cookie.
-    sameSite: 'lax',
+    // Frontend and backend deploy as separate Vercel projects on different domains, so this must
+    // be 'none' in production (paired with secure: true above) or the browser won't send the
+    // cookie on cross-origin requests. 'lax' is fine for local dev where both run on localhost.
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: '/'
   };
