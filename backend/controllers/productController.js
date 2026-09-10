@@ -13,7 +13,9 @@ export const getProducts = async (req, res, next) => {
       sort = '-createdAt',
       page = 1,
       limit = 12,
-      featured
+      featured,
+      onSale,
+      inStock
     } = req.query;
 
     const filter = { isActive: true };
@@ -38,6 +40,14 @@ export const getProducts = async (req, res, next) => {
 
     if (featured === 'true') {
       filter.isFeatured = true;
+    }
+
+    if (onSale === 'true') {
+      filter.discountPercentage = { $gt: 0 };
+    }
+
+    if (inStock === 'true') {
+      filter['variants.stockQuantity'] = { $gt: 0 };
     }
 
     const pageNum = Math.max(1, Number(page));

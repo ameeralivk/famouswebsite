@@ -47,6 +47,7 @@ export const addItem = async (req, res, next) => {
         variantId: variant._id,
         variantName: variant.variantName,
         sku: variant.sku,
+        image: variant.images?.[0] || product.mainImage || '',
         quantity,
         priceAtAdd: product.getVariantPrice(variant._id)
       });

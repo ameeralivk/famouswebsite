@@ -12,7 +12,7 @@ const emptyVariant = () => ({
 const fieldClass = 'w-full border border-ink-200 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-400 transition';
 const labelClass = 'block text-xs font-semibold text-ink-500 mb-1';
 
-const VariantBuilder = ({ variants, onChange }) => {
+const VariantBuilder = ({ variants, onChange, basePrice = 0, discountPercentage = 0 }) => {
   const updateVariant = (index, field, value) => {
     const next = variants.map((v, i) => (i === index ? { ...v, [field]: value } : v));
     onChange(next);
@@ -21,6 +21,12 @@ const VariantBuilder = ({ variants, onChange }) => {
   const addVariant = () => onChange([...variants, emptyVariant()]);
 
   const removeVariant = (index) => onChange(variants.filter((_, i) => i !== index));
+
+  const computeFinalPrice = (additionalPrice) => {
+    const preDiscount = basePrice + (Number(additionalPrice) || 0);
+    const discount = (preDiscount * discountPercentage) / 100;
+    return Math.round((preDiscount - discount) * 100) / 100;
+  };
 
   return (
     <div className="space-y-3">
@@ -44,11 +50,11 @@ const VariantBuilder = ({ variants, onChange }) => {
           </div>
 
           <div>
-            <label className={labelClass}>+Price (₹)</label>
+            <label className={labelClass}>Price Adjustment (₹)</label>
             <input
               type="number"
               value={variant.additionalPrice}
-              onChange={(e) => updateVariant(index, 'additionalPrice', Number(e.target.value))}
+              onChange={(e) => updateVariant(index, 'additionalPrice', e.target.value)}
               className={fieldClass}
             />
           </div>
@@ -59,10 +65,16 @@ const VariantBuilder = ({ variants, onChange }) => {
               type="number"
               min={0}
               value={variant.stockQuantity}
-              onChange={(e) => updateVariant(index, 'stockQuantity', Number(e.target.value))}
+              onChange={(e) => updateVariant(index, 'stockQuantity', e.target.value)}
               className={fieldClass}
               required
             />
+          </div>
+
+          <div className="sm:col-span-5 -mt-1">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-100 rounded-full px-3 py-1">
+              This variant will sell for ₹{computeFinalPrice(variant.additionalPrice)}
+            </span>
           </div>
 
           <div className="sm:col-span-4">

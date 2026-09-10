@@ -8,10 +8,12 @@ import Coupon from '../models/Coupon.js';
 export const createOrder = async (req, res, next) => {
   const session = await mongoose.startSession();
   try {
-    const { shippingAddress, paymentMethod = 'COD' } = req.body;
+    const { shippingAddress } = req.body;
     if (!shippingAddress) {
       return res.status(400).json({ message: 'shippingAddress is required' });
     }
+    // Only Cash on Delivery is supported for now — no payment gateway is wired up yet.
+    const paymentMethod = 'COD';
 
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart || cart.items.length === 0) {
@@ -50,6 +52,7 @@ export const createOrder = async (req, res, next) => {
         productName: product.name,
         variantName: variant.variantName,
         sku: variant.sku,
+        image: variant.images?.[0] || product.mainImage || '',
         quantity: item.quantity,
         unitPrice,
         lineTotal
@@ -133,10 +136,28 @@ export const getOrderById = async (req, res, next) => {
 };
 
 // GET /api/orders/admin/all (Admin)
-export const getAllOrders = async (_req, res, next) => {
+export const getAllOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find().populate('user', 'name email').sort('-createdAt');
-    res.status(200).json({ orders });
+    const { status, page = 1, limit = 10 } = req.query;
+    const filter = {};
+    if (status && status !== 'All') filter.status = status;
+
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(100, Math.max(1, Number(limit)));
+
+    const [orders, total] = await Promise.all([
+      Order.find(filter)
+        .populate('user', 'name email')
+        .sort('-createdAt')
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum),
+      Order.countDocuments(filter)
+    ]);
+
+    res.status(200).json({
+      orders,
+      pagination: { total, page: pageNum, pages: Math.ceil(total / limitNum), limit: limitNum }
+    });
   } catch (err) {
     next(err);
   }

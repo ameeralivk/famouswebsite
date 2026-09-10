@@ -1,10 +1,27 @@
 import Category from '../models/Category.js';
 
 // GET /api/categories
-export const getCategories = async (_req, res, next) => {
+// Defaults to a generous limit so existing unpaginated callers (e.g. the storefront's category
+// nav) keep getting the full list; pass page/limit explicitly (as the admin panel does) to page.
+export const getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.find({ isActive: true }).sort('name');
-    res.status(200).json({ categories });
+    const { page = 1, limit = 100 } = req.query;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(100, Math.max(1, Number(limit)));
+
+    const filter = { isActive: true };
+    const [categories, total] = await Promise.all([
+      Category.find(filter)
+        .sort('name')
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum),
+      Category.countDocuments(filter)
+    ]);
+
+    res.status(200).json({
+      categories,
+      pagination: { total, page: pageNum, pages: Math.ceil(total / limitNum), limit: limitNum }
+    });
   } catch (err) {
     next(err);
   }

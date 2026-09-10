@@ -62,7 +62,16 @@ const ProductForm = ({ product, onSaved, onCancel }) => {
     setError('');
     setSubmitting(true);
     try {
-      const payload = { ...form, basePrice: Number(form.basePrice), discountPercentage: Number(form.discountPercentage) };
+      const payload = {
+        ...form,
+        basePrice: Number(form.basePrice) || 0,
+        discountPercentage: Number(form.discountPercentage) || 0,
+        variants: form.variants.map((v) => ({
+          ...v,
+          additionalPrice: Number(v.additionalPrice) || 0,
+          stockQuantity: Number(v.stockQuantity) || 0
+        }))
+      };
       if (product) {
         await api.put(`/products/${product._id}`, payload);
       } else {
@@ -117,6 +126,10 @@ const ProductForm = ({ product, onSaved, onCancel }) => {
         <div>
           <label className={labelClass}>Base Price (₹)</label>
           <input type="number" name="basePrice" value={form.basePrice} onChange={handleChange} required min={0} className={inputClass} />
+          <p className="text-xs text-ink-400 mt-1.5">
+            The default price. Each variant below only needs a <strong>Price Adjustment</strong> if it costs
+            more or less than this — leave that at 0 if it's the same price.
+          </p>
         </div>
 
         <div>
@@ -158,7 +171,12 @@ const ProductForm = ({ product, onSaved, onCancel }) => {
 
       <div>
         <h3 className="text-sm font-semibold text-ink-700 mb-3">Variants</h3>
-        <VariantBuilder variants={form.variants} onChange={(variants) => setForm({ ...form, variants })} />
+        <VariantBuilder
+          variants={form.variants}
+          onChange={(variants) => setForm({ ...form, variants })}
+          basePrice={Number(form.basePrice) || 0}
+          discountPercentage={Number(form.discountPercentage) || 0}
+        />
       </div>
 
       <div className="flex gap-3 pt-2">

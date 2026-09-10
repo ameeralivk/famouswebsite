@@ -38,10 +38,24 @@ export const createCoupon = async (req, res, next) => {
 };
 
 // GET /api/coupons (Admin)
-export const getCoupons = async (_req, res, next) => {
+export const getCoupons = async (req, res, next) => {
   try {
-    const coupons = await Coupon.find().sort('-createdAt');
-    res.status(200).json({ coupons });
+    const { page = 1, limit = 10 } = req.query;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.min(100, Math.max(1, Number(limit)));
+
+    const [coupons, total] = await Promise.all([
+      Coupon.find()
+        .sort('-createdAt')
+        .skip((pageNum - 1) * limitNum)
+        .limit(limitNum),
+      Coupon.countDocuments()
+    ]);
+
+    res.status(200).json({
+      coupons,
+      pagination: { total, page: pageNum, pages: Math.ceil(total / limitNum), limit: limitNum }
+    });
   } catch (err) {
     next(err);
   }

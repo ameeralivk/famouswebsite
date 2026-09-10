@@ -51,7 +51,7 @@ const ProductDetailPage = () => {
     return (
       <div className="text-center py-20">
         <p className="text-ink-500 font-medium">Product not found.</p>
-        <Link to="/" className="text-brand-600 font-semibold hover:underline mt-2 inline-block">
+        <Link to="/shop" className="text-brand-600 font-semibold hover:underline mt-2 inline-block">
           Back to shop
         </Link>
       </div>

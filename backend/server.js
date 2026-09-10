@@ -52,6 +52,8 @@ import couponRoutes from './routes/couponRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
+import shopMediaRoutes from './routes/shopMediaRoutes.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -84,6 +86,8 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/shop-media', shopMediaRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

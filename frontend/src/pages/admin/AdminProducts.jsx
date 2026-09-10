@@ -2,17 +2,23 @@ import { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import ProductTable from '../../components/admin/ProductTable.jsx';
 import ProductForm from '../../components/admin/ProductForm.jsx';
+import Pagination from '../../components/admin/Pagination.jsx';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
+  const [pagination, setPagination] = useState(null);
+  const [page, setPage] = useState(1);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
 
   const loadProducts = () => {
-    api.get('/products', { params: { limit: 100 } }).then(({ data }) => setProducts(data.products));
+    api.get('/products', { params: { page, limit: 10 } }).then(({ data }) => {
+      setProducts(data.products);
+      setPagination(data.pagination);
+    });
   };
 
-  useEffect(loadProducts, []);
+  useEffect(loadProducts, [page]);
 
   const handleEdit = (product) => {
     setEditingProduct(product);
@@ -58,7 +64,10 @@ const AdminProducts = () => {
           }}
         />
       ) : (
-        <ProductTable products={products} onEdit={handleEdit} onDelete={handleDelete} />
+        <>
+          <ProductTable products={products} onEdit={handleEdit} onDelete={handleDelete} />
+          <Pagination pagination={pagination} onPageChange={setPage} />
+        </>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ const cartItemSchema = new mongoose.Schema(
     variantId: { type: mongoose.Schema.Types.ObjectId, required: true },
     variantName: { type: String, required: true },
     sku: { type: String, required: true },
+    image: { type: String, default: '' },
     quantity: { type: Number, required: true, min: 1, default: 1 },
     priceAtAdd: { type: Number, required: true } // snapshot of unit price when added
   },

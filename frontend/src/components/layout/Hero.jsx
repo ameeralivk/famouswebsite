@@ -26,10 +26,10 @@ const Hero = () => (
         </p>
 
         <div className="mt-8 flex flex-wrap gap-3.5">
-          <Link to="/?category=hardware" className="bg-brand-gradient text-white font-semibold px-7 py-3.5 rounded-full shadow-card hover:opacity-90 hover:shadow-card-hover transition-all">
-            Shop Hardware
+          <Link to="/shop" className="bg-brand-gradient text-white font-semibold px-7 py-3.5 rounded-full shadow-card hover:opacity-90 hover:shadow-card-hover transition-all">
+            Explore Products
           </Link>
-          <Link to="/?category=lightings" className="bg-white/5 text-white font-semibold px-7 py-3.5 rounded-full border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all">
+          <Link to="/shop" className="bg-white/5 text-white font-semibold px-7 py-3.5 rounded-full border border-white/20 hover:bg-white/15 hover:border-white/30 transition-all">
             Explore Lightings
           </Link>
         </div>

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
-import CategoryNav from './CategoryNav.jsx';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -12,7 +11,7 @@ const Header = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    navigate(`/?search=${encodeURIComponent(query)}`);
+    navigate(`/shop?search=${encodeURIComponent(query)}`);
   };
 
   const handleLogout = async () => {
@@ -54,6 +53,10 @@ const Header = () => {
         </form>
 
         <div className="flex items-center gap-5 text-sm">
+          <Link to="/shop" className="text-ink-600 hover:text-brand-600 font-medium transition-colors hidden sm:inline">
+            Shop
+          </Link>
+
           <Link to="/cart" className="flex items-center gap-1.5 text-ink-600 hover:text-brand-600 font-medium transition-colors">
             <span className="relative">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -72,6 +75,9 @@ const Header = () => {
 
           {user ? (
             <div className="flex items-center gap-3">
+              <Link to="/orders" className="text-ink-600 hover:text-brand-600 font-medium transition-colors hidden sm:inline">
+                My Orders
+              </Link>
               {user.role === 'admin' && (
                 <Link
                   to="/admin/dashboard"
@@ -100,8 +106,6 @@ const Header = () => {
           )}
         </div>
       </div>
-
-      <CategoryNav />
     </header>
   );
 };

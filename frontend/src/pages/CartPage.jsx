@@ -1,6 +1,10 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import WhatsAppIcon from '../components/common/WhatsAppIcon.jsx';
+import ConfirmDialog from '../components/common/ConfirmDialog.jsx';
+import { buildCartWhatsAppMessage, getWhatsAppUrl } from '../utils/whatsapp.js';
 
 const QuantityStepper = ({ quantity, onChange }) => (
   <div className="flex items-center border border-ink-200 rounded-lg overflow-hidden shrink-0">
@@ -28,19 +32,32 @@ const QuantityStepper = ({ quantity, onChange }) => (
 const CartPage = () => {
   const { cart, loading, updateItem, removeItem } = useCart();
   const { showToast } = useToast();
+  const navigate = useNavigate();
+  const [itemToRemove, setItemToRemove] = useState(null);
 
   const updateQuantity = (itemId, quantity) => {
     if (quantity < 1) return;
     updateItem(itemId, quantity);
   };
 
-  const handleRemove = async (item) => {
+  const confirmRemove = async () => {
+    const item = itemToRemove;
+    setItemToRemove(null);
     try {
       await removeItem(item._id);
       showToast(`${item.variantName} removed from cart`, 'warning');
     } catch {
       showToast('Could not remove item. Please try again.', 'error');
     }
+  };
+
+  const handleWhatsAppOrder = () => {
+    const url = getWhatsAppUrl(buildCartWhatsAppMessage(cart));
+    if (!url) {
+      showToast('WhatsApp ordering is not set up yet. Please use checkout instead.', 'error');
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   if (loading) {
@@ -75,7 +92,7 @@ const CartPage = () => {
           </div>
           <p className="text-ink-700 font-semibold">Your cart is empty</p>
           <p className="text-ink-400 text-sm max-w-xs">Browse our hardware, sanitary and lighting collections to find what you need.</p>
-          <Link to="/" className="mt-2 text-white bg-brand-gradient font-semibold px-6 py-2.5 rounded-full shadow-card hover:opacity-90 transition">
+          <Link to="/shop" className="mt-2 text-white bg-brand-gradient font-semibold px-6 py-2.5 rounded-full shadow-card hover:opacity-90 transition">
             Continue Shopping
           </Link>
         </div>
@@ -87,10 +104,14 @@ const CartPage = () => {
                 key={item._id}
                 className="flex items-center gap-4 bg-white border border-ink-100 rounded-2xl p-4 shadow-card"
               >
-                <div className="w-14 h-14 rounded-xl bg-ink-50 border border-ink-100 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-ink-300" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 7L12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
+                <div className="w-14 h-14 rounded-xl bg-ink-50 border border-ink-100 flex items-center justify-center shrink-0 overflow-hidden">
+                  {item.image ? (
+                    <img src={item.image} alt={item.variantName} className="w-full h-full object-cover" />
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-ink-300" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 7L12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  )}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -102,7 +123,7 @@ const CartPage = () => {
                 <div className="flex flex-col items-end gap-2">
                   <QuantityStepper quantity={item.quantity} onChange={(qty) => updateQuantity(item._id, qty)} />
                   <button
-                    onClick={() => handleRemove(item)}
+                    onClick={() => setItemToRemove(item)}
                     className="flex items-center gap-1 text-red-500 text-xs font-medium hover:underline"
                   >
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -136,8 +157,19 @@ const CartPage = () => {
               <span className="font-display font-extrabold text-xl text-ink-900 tabular-nums">₹{subtotal.toFixed(2)}</span>
             </div>
 
-            <button className="w-full py-3.5 bg-brand-gradient hover:opacity-90 text-white font-semibold rounded-full shadow-card transition">
+            <button
+              onClick={() => navigate('/checkout')}
+              className="w-full py-3.5 bg-brand-gradient hover:opacity-90 text-white font-semibold rounded-full shadow-card transition"
+            >
               Proceed to Checkout
+            </button>
+
+            <button
+              onClick={handleWhatsAppOrder}
+              className="w-full mt-2.5 py-3.5 flex items-center justify-center gap-2 bg-[#25D366] hover:opacity-90 text-white font-semibold rounded-full shadow-card transition"
+            >
+              <WhatsAppIcon className="w-5 h-5" />
+              Order via WhatsApp
             </button>
 
             <p className="mt-4 flex items-center justify-center gap-1.5 text-xs text-ink-400">
@@ -145,11 +177,21 @@ const CartPage = () => {
                 <rect x="3" y="11" width="18" height="10" rx="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Secure checkout
+              Cash on Delivery available
             </p>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(itemToRemove)}
+        title="Remove item?"
+        message={itemToRemove ? `Remove "${itemToRemove.variantName}" from your cart?` : ''}
+        confirmLabel="Remove"
+        danger
+        onConfirm={confirmRemove}
+        onCancel={() => setItemToRemove(null)}
+      />
     </div>
   );
 };
